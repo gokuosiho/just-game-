@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>My FPS Game</title>
+
+<style>
+body{
+margin:0;
+overflow:hidden;
+background:black;
+font-family:Arial;
+}
+
+#crosshair{
+position:absolute;
+top:50%;
+left:50%;
+width:20px;
+height:20px;
+margin-left:-10px;
+margin-top:-10px;
+border:2px solid white;
+border-radius:50%;
+}
+
+#ui{
+position:absolute;
+top:10px;
+left:10px;
+color:white;
+font-size:20px;
+}
+
+button{
+padding:10px;
+font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="ui">
+Score: <span id="score">0</span>
+<br>
+<button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="crosshair"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+
+let scene,camera,renderer;
+let cubes=[];
+let score=0;
+
+function startGame(){
+
+scene = new THREE.Scene();
+
+camera = new THREE.PerspectiveCamera(
+75,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
+);
+
+renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(5,10,7);
+scene.add(light);
+
+const floorGeo = new THREE.PlaneGeometry(200,200);
+const floorMat = new THREE.MeshBasicMaterial({color:0x333333});
+const floor = new THREE.Mesh(floorGeo,floorMat);
+
+floor.rotation.x = -Math.PI/2;
+scene.add(floor);
+
+camera.position.y=2;
+
+spawnTargets();
+
+animate();
+
+document.addEventListener("click",shoot);
+
+}
+
+function spawnTargets(){
+
+for(let i=0;i<10;i++){
+
+let geo = new THREE.BoxGeometry(1,1,1);
+let mat = new THREE.MeshStandardMaterial({color:0xff0000});
+
+let cube = new THREE.Mesh(geo,mat);
+
+cube.position.x = Math.random()*20-10;
+cube.position.y = 1;
+cube.position.z = Math.random()*-20;
+
+scene.add(cube);
+cubes.push(cube);
+
+}
+
+}
+
+function shoot(){
+
+let raycaster = new THREE.Raycaster();
+
+raycaster.setFromCamera(
+new THREE.Vector2(0,0),
+camera
+);
+
+let hits = raycaster.intersectObjects(cubes);
+
+if(hits.length>0){
+
+scene.remove(hits[0].object);
+score++;
+document.getElementById("score").innerText=score;
+
+}
+
+}
+
+function animate(){
+
+requestAnimationFrame(animate);
+renderer.render(scene,camera);
+
+}
+
+</script>
+
+</body>
+</html>
